@@ -107,7 +107,7 @@ class ImageProcessor:
         ])
         return src, dst
 
-    def _transform_perspective(self, img):
+    def transform_perspective(self, img):
         height, width, color = img.shape
 
         src, dst = self._calc_warp_points(img)
@@ -118,8 +118,17 @@ class ImageProcessor:
 
         return cv2.warpPerspective(img, self._M, (width, height), flags=cv2.INTER_LINEAR)
 
+    def restore_perspective(self, img):
+        height, width, color = img.shape
+
+        if self._M_inv is None:
+            raise Exception("[Image Processor]: You must first calculate the perspective transformation before "
+                            "restoring it.")
+
+        return cv2.warpPerspective(img, self._M_inv, (width, height), flags=cv2.INTER_LINEAR)
+
     def prepare_image(self, img):
-        transformed = self._transform_perspective(img)
+        transformed = self.transform_perspective(img)
         thresholded = self._thresholded_image(transformed)
 
         return thresholded

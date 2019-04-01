@@ -3,6 +3,7 @@ import glob
 import matplotlib.pyplot as plt
 from lib.camera import Camera
 from lib.line_finder import LineFinder
+from moviepy.editor import VideoFileClip
 
 sample_camera = False
 camera = Camera()
@@ -50,11 +51,21 @@ else:
     camera.load()
 
 
+debug = False
+
+# Test on images
 images = glob.glob('./test_images/*.jpg')
-line_finder = LineFinder(camera, debug=True)
 
 for i, fname in enumerate(images):
     img = cv2.imread(fname)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
+    line_finder = LineFinder(camera, debug=debug)
     line_finder.process(img)
+
+# Test on video
+line_finder = LineFinder(camera, debug=debug)
+video_output = 'project_video_output.mp4'
+video_input = VideoFileClip('project_video.mp4').subclip(20, 30)
+processed_video = video_input.fl_image(line_finder.process)
+processed_video.write_videofile(video_output, audio=False)
