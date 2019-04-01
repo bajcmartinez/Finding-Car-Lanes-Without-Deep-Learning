@@ -51,21 +51,35 @@ else:
     camera.load()
 
 
-debug = False
+debug = True
 
 # Test on images
-images = glob.glob('./test_images/*.jpg')
+# images = glob.glob('./test_images/*.jpg')
+#
+# for i, fname in enumerate(images):
+#     img = cv2.imread(fname)
+#     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+#
+#     line_finder = LineFinder(camera, debug=debug)
+#     line_finder.process(img)
 
-for i, fname in enumerate(images):
-    img = cv2.imread(fname)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-    line_finder = LineFinder(camera, debug=debug)
-    line_finder.process(img)
-
-# Test on video
-line_finder = LineFinder(camera, debug=debug)
+# Test on project video
+line_finder = LineFinder(camera, debug=debug, is_video=True)
 video_output = 'project_video_output.mp4'
-video_input = VideoFileClip('project_video.mp4').subclip(20, 30)
+video_input = VideoFileClip('project_video.mp4')
 processed_video = video_input.fl_image(line_finder.process)
 processed_video.write_videofile(video_output, audio=False)
+
+# Test on challenge
+# line_finder = LineFinder(camera, debug=debug, is_video=True)
+# video_output = 'challenge_video_output.mp4'
+# video_input = VideoFileClip('challenge_video.mp4')
+# processed_video = video_input.fl_image(line_finder.process).subclip(0, 10)
+# processed_video.write_videofile(video_output, audio=False)
+
+# Test on harder challenge
+# line_finder = LineFinder(camera, debug=debug, is_video=True)
+# video_output = 'harder_challenge_video_output.mp4'
+# video_input = VideoFileClip('harder_challenge_video.mp4')
+# processed_video = video_input.fl_image(line_finder.process)
+# processed_video.write_videofile(video_output, audio=False)

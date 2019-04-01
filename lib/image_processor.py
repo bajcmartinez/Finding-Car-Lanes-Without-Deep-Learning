@@ -58,7 +58,7 @@ class ImageProcessor:
         g_channel = img[:, :, 1]
         return (r_channel > thresh) & (g_channel > thresh)
 
-    def _thresholded_image(self, img):
+    def thresholded_image(self, img):
         grey = self._to_greyscale(img)
         grey = self._enhance(grey)
 
@@ -72,7 +72,7 @@ class ImageProcessor:
         gradient_condition = ((sx_condition == 1) & (dir_condition == 1))
 
         # and color threshold
-        color_condition = self._color_condition(img, thresh=150)
+        color_condition = self._color_condition(img, thresh=200)
 
         # now let's take the HSL threshold
         l_hls_condition = self._hls_condition(img, channel='l', thresh=(120, 255))
@@ -129,6 +129,6 @@ class ImageProcessor:
 
     def prepare_image(self, img):
         transformed = self.transform_perspective(img)
-        thresholded = self._thresholded_image(transformed)
+        thresholded = self.thresholded_image(transformed)
 
         return thresholded
