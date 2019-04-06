@@ -20,8 +20,8 @@ class LineFinder:
         self._is_video = is_video
         self._image_processor = ImageProcessor(self._debug)
 
-        self._xm_per_pix = 3.048 / 100
-        self._ym_per_pix = 3.7 / 378
+        self._xm_per_pix = 3.7 / 1280
+        self._ym_per_pix = 30 / 720
 
         self.left_lane = Lane(xm_per_pix=self._xm_per_pix, ym_per_pix=self._ym_per_pix)
         self.right_lane = Lane(xm_per_pix=self._xm_per_pix, ym_per_pix=self._ym_per_pix)
@@ -210,14 +210,42 @@ class LineFinder:
         return lanes_img
 
     def draw_info(self, img):
+        """
+        Draw informational text on the picture
+
+        :param img:
+        :return:
+        """
         info_img = np.copy(img)
 
         font = cv2.FONT_HERSHEY_COMPLEX
 
-        text = 'Left curvature: ' + '{:04.2f}'.format(self.left_lane.radius_of_curvature) + 'm'
+        curvature = (self.left_lane.radius_of_curvature + self.right_lane.radius_of_curvature) / 2
+        text = 'Curvature: ' + '{:04.2f}'.format(curvature) + 'm'
         cv2.putText(info_img, text, (40, 70), font, 1.5, (200, 255, 155), 2, cv2.LINE_AA)
 
-        text = 'Right curvature: ' + '{:04.2f}'.format(self.right_lane.radius_of_curvature) + 'm'
+        # plot_y = np.linspace(0, img.shape[0]-1, img.shape[0])
+        # y_eval = np.max(plot_y)
+        #
+        # left_fit_cr = self.left_lane.current_fit
+        # right_fit_cr = self.right_lane.current_fit
+        # left_lane_bottom = (left_fit_cr[0] * y_eval) ** 2 + left_fit_cr[0] * y_eval + left_fit_cr[2]
+        # right_lane_bottom = (right_fit_cr[0] * y_eval) ** 2 + right_fit_cr[0] * y_eval + right_fit_cr[2]
+        #
+        # lane_center = (left_lane_bottom + right_lane_bottom) / 2
+
+        lane_center = (self.left_lane.best_fit[-1] + self.right_lane.best_fit[-1]) / 2
+        car_center = img.shape[1] / 2
+        dx = (car_center - lane_center) * self._xm_per_pix
+
+        if dx > 0:
+            text = 'Vehicle is ' + '{:2.1f}'.format(dx) + 'm left from the center'
+        elif dx < 0:
+            text = 'Vehicle is ' + '{:2.1f}'.format(abs(dx)) + 'm right from the center'
+        else:
+            text = 'The vehicle is in the center of the lane'
+
+
         cv2.putText(info_img, text, (40, 120), font, 1.5, (200, 255, 155), 2, cv2.LINE_AA)
 
         return info_img

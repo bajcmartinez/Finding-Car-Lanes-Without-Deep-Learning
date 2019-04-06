@@ -25,6 +25,8 @@ class Lane():
         self.history_weights = [x//2+1 for x in range(self.max_history)]
         # radius of curvature of the line in some units
         self.radius_of_curvature = None
+        # sanity check lane
+        self._insanity = 0.0
         # distance in meters of vehicle center from the line
         self.line_base_pos = None
         # difference in fit coefficients between last and new fits
@@ -38,6 +40,18 @@ class Lane():
         # meters per pixel in dimension
         self._xm_per_pix = xm_per_pix
         self._ym_per_pix = ym_per_pix
+
+    def sanity_check_lane(self, R):
+        """
+        Checks the radius of curvature `R` against the radius stored in the object.
+        """
+        # Return true if there is no prior data
+        if self.radius_of_curvature is None:
+            return True
+
+        R0 = self.radius_of_curvature
+        self._insanity = abs(R - R0) / R0
+        return self._insanity <= 0.5
 
     def calculate_curvature(self):
         fit_cr = np.polyfit(self.all_y * self._ym_per_pix, self.all_x * self._xm_per_pix, 2)
@@ -64,16 +78,24 @@ class Lane():
             # update points
             self.all_x = points_x
             self.all_y = points_y
-            self.radius_of_curvature = self.calculate_curvature()
+            _radius_of_curvature = self.calculate_curvature()
+            self.detected = self.sanity_check_lane(_radius_of_curvature)
+            if self.detected:
+                self.radius_of_curvature = _radius_of_curvature
 
-            # if we detected a good fit then we store in current_fit
-            self.current_fit = fit
-            self.history_fit.append(fit)
-            # keep only last N items
-            self.history_fit = self.history_fit[-self.max_history:]
+                # if we detected a good fit then we store in current_fit
+                self.current_fit = fit
+                self.history_fit.append(fit)
+                # keep only last N items
+                self.history_fit = self.history_fit[-self.max_history:]
 
-            # calculate the average
-            self.best_fit = np.average(self.history_fit, axis=0, weights=self.history_weights[:len(self.history_fit)])
+                # calculate the average
+                self.best_fit = np.average(self.history_fit, axis=0, weights=self.history_weights[:len(self.history_fit)])
+            else:
+                # we fail the sanity check
+                self.detected = False
+                self.current_fit = [np.array([False])]
+
         else:
             self.detected = False
             self.current_fit = [np.array([False])]
