@@ -15,12 +15,14 @@ The goals / steps of this project are the following:
 
 [p_image_processor_1]: ./examples/p_image_processor_1.jpg "Image Processor 1"
 [p_image_processor_2]: ./examples/p_image_processor_2.jpg "Image Processor 2"
-[image2]: ./test_images/test1.jpg "Road Transformed"
-[image3]: ./examples/binary_combo_example.jpg "Binary Example"
-[image4]: ./examples/warped_straight_lines.jpg "Warp Example"
-[image5]: ./examples/color_fit_lines.jpg "Fit Visual"
-[image6]: ./examples/example_output.jpg "Output"
-[video1]: ./project_video.mp4 "Video"
+[r_image_1]: ./output_images/straight_lines1.jpg "Result"
+[r_image_2]: ./output_images/straight_lines2.jpg "Result"
+[r_image_3]: ./output_images/test1.jpg "Result"
+[r_image_4]: ./output_images/test2.jpg "Result"
+[r_image_5]: ./output_images/test3.jpg "Result"
+[r_image_6]: ./output_images/test4.jpg "Result"
+[r_image_7]: ./output_images/test5.jpg "Result"
+[r_image_8]: ./output_images/test6.jpg "Result"
 
 ---
 
@@ -156,11 +158,36 @@ This module is the principal responsible for finding lanes in the pictures and h
 
 The main method is `line_finder.process(img)` which expects an image and returns the processed image
 
+Here are all the steps that are required:
 
+1. Undistort the given image using the camera module
+2. Prepare the image for analysis using the image_processor module
+3. Find lanes
+    3.1 Use the histogram method is no lanes where found on the previous frame
+    3.2 If lanes were found on previous frame, just look for lines on the nearby
+4. Update the lane information on the lane module
+    4.1 Calculate curvature
+    ```python
+    fit_cr = np.polyfit(self.all_y * self._ym_per_pix, self.all_x * self._xm_per_pix, 2)
+    plot_y = np.linspace(0, 720 - 1, 720)
+    y_eval = np.max(plot_y)
 
-###
+    curve = ((1 + (2 * fit_cr[0] * y_eval * self._ym_per_pix + fit_cr[1]) ** 2) ** 1.5) / np.absolute(2 * fit_cr[0])
+    ```
+    4.2 Run sanity check
+    ```python
+    R0 = self.radius_of_curvature
+    self._insanity = abs(R - R0) / R0
+    return self._insanity <= 0.5
+    ```
+    
+5. Restore perspective on the lanes so it can be over imposed the original image
+6. Draw the curvature and distance from the center of the lane into the image
 
-## Pipeline
+Here are some examples
 
-### Camera Calibration
-
+![alt text][r_image_1]           |  ![alt text][r_image_2]
+:-------------------------------:|:-------------------------------:
+![alt text][r_image_3] | ![alt text][r_image_4]
+![alt text][r_image_5] | ![alt text][r_image_6]
+![alt text][r_image_7] | ![alt text][r_image_8]
