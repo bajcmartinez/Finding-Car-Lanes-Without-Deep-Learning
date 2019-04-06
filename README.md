@@ -23,6 +23,7 @@ The goals / steps of this project are the following:
 [r_image_6]: ./output_images/test4.jpg "Result"
 [r_image_7]: ./output_images/test5.jpg "Result"
 [r_image_8]: ./output_images/test6.jpg "Result"
+[r_video]: ./output_images/project_video_output.gif "Result"
 
 ---
 
@@ -191,3 +192,7 @@ Here are some examples
 ![alt text][r_image_3] | ![alt text][r_image_4]
 ![alt text][r_image_5] | ![alt text][r_image_6]
 ![alt text][r_image_7] | ![alt text][r_image_8]
+
+And sample video
+
+![alt_text][r_video]
